@@ -1,0 +1,55 @@
+_schema-version: "3.2"
+ID: sapui5mta
+version: 0.0.1
+modules:
+- name: sapui5mta-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: sapui5mta-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - sdrsapui5app.zip
+      name: sdrsapui5app
+      target-path: resources/
+- name: sdrsapui5app
+  type: html5
+  path: sapui5app
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: sapui5mta-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: sapui5mta-html5-srv
+    service-plan: app-host
+- name: sapui5mta-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: false
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: sapui5mta-destination-service
+    service-plan: lite
+parameters:
+  deploy_mode: html5-repo
